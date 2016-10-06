@@ -7,7 +7,8 @@
 # order to use the same Makefile
 #(ARM Linux) ln -s /usr/bin/ /usr/share/ti/cgt-pru/bin
 
-PRU_CGT=/Users/bolandrm/hardware/ti-cgt-pru_2.1.3
+#OSX
+#PRU_CGT=/Users/bolandrm/hardware/ti-cgt-pru_2.1.3
 
 ifndef PRU_CGT
 define ERROR_BODY

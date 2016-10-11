@@ -19,3 +19,5 @@ erl_crash.dump
 priv/rc_pru0/*
 priv/rate_pid_pru1/*
 priv/pru_loader/*
+priv/*.so
+*.so

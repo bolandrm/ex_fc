@@ -7,7 +7,7 @@ defmodule ExFC.Mixfile do
      elixir: "~> 1.3",
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
-     compilers: compilers(),
+     compilers: [:elixir_make] ++ Mix.compilers,
      deps: deps()]
   end
 
@@ -15,7 +15,12 @@ defmodule ExFC.Mixfile do
   #
   # Type "mix help compile.app" for more information
   def application do
-    [applications: [:logger]]
+    [
+      mod: {ExFC, []},
+      applications: [
+        :logger
+      ]
+    ]
   end
 
   # Dependencies can be Hex packages:
@@ -29,13 +34,5 @@ defmodule ExFC.Mixfile do
   # Type "mix help deps" for more examples and options
   defp deps do
     [{:elixir_make, "~> 0.3.0"}]
-  end
-
-  def compilers do
-    if Mix.env == :prod do
-      [:elixir_make] ++ Mix.compilers
-    else
-      Mix.compilers
-    end
   end
 end

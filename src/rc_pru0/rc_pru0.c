@@ -36,6 +36,11 @@
 #include <pru_iep.h>
 #include "resource_table_empty.h"
 
+#define CLR(x,y) (x&=(~(1<<y)))
+#define SET(x,y) (x|=(1<<y))
+#define TOGGLE(x,y) (x^=(1<<y))
+#define _BV(bit) (1 << (bit))
+
 volatile register uint32_t __R30;
 volatile register uint32_t __R31;
 

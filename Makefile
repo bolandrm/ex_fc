@@ -15,12 +15,16 @@ build_pru0:
 build_pru_loader:
 	make -C src/pru_loader
 
-.PHONY: up
-up:
-	rsync -av --progress --exclude=_build --exclude=priv --exclude=deps --exclude=".git" --delete . $(REMOTE_USER):$(REMOTE_DEST)
-	ssh $(REMOTE_USER) "MIX_ENV=prod cd $(REMOTE_DEST) mix deps.get"
-	ssh $(REMOTE_USER) "MIX_ENV=prod cd $(REMOTE_DEST) mix compile"
+.PHONY: push
+push:
+	rsync -av --exclude=_build --exclude=priv --exclude=deps --exclude=".git" --delete . $(REMOTE_USER):$(REMOTE_DEST)
+	ssh $(REMOTE_USER) "cd $(REMOTE_DEST); MIX_ENV=prod mix deps.get"
+	ssh $(REMOTE_USER) "cd $(REMOTE_DEST); MIX_ENV=prod mix compile"
 	#ssh $(REMOTE_USER) "MIX_ENV=prod cd $(REMOTE_DEST) elixir --detached -S mix run"
+
+.PHONY: pull
+pull:
+	rsync -av --exclude=_build --exclude=priv --exclude=deps --exclude=".git" --delete $(REMOTE_USER):$(REMOTE_DEST) .
 
 .PHONY: run
 run:

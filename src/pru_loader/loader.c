@@ -1,41 +1,58 @@
 #include <stdio.h>
-#include <stdlib.h>
 #include <stdint.h>
 #include <prussdrv.h>
 #include <pruss_intc_mapping.h>
+#include "erl_nif.h"
 
-int main(int argc, char **argv) {
-  if (argc != 2 && argc != 3) {
-    printf("Usage: %s loader text.bin [data.bin]\n", argv[0]);
-    return 1;
-  }
+#define MAX_BUF_LEN 1024
 
+static ERL_NIF_TERM
+enable_prus(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
+  char text1[MAX_BUF_LEN];
+  char data1[MAX_BUF_LEN];
+  char text2[MAX_BUF_LEN];
+  char data2[MAX_BUF_LEN];
+
+  enif_get_string(env, argv[0], text1, MAX_BUF_LEN, ERL_NIF_LATIN1);
+  enif_get_string(env, argv[1], data1, MAX_BUF_LEN, ERL_NIF_LATIN1);
+  enif_get_string(env, argv[2], text2, MAX_BUF_LEN, ERL_NIF_LATIN1);
+  enif_get_string(env, argv[3], data2, MAX_BUF_LEN, ERL_NIF_LATIN1);
+
+  printf("c printing %s \n", text1);
+
+  return enif_make_int(env, 0);
+}
+
+static ErlNifFunc nif_funcs[] = {
+  // {erl_function_name, erl_function_arity, c_function}
+  {"enable_prus", 4, enable_prus}
+};
+
+ERL_NIF_INIT(Elixir.ExFC.PruLoader, nif_funcs, NULL, NULL, NULL, NULL)
+
+void load_pru1(char *text_file, char *data_file) {
   printf("doing it\n");
 
   prussdrv_init();
   if (prussdrv_open(PRU_EVTOUT_0) == -1) {
     printf("prussdrv_open() failed\n");
-    return 1;
   }
 
   tpruss_intc_initdata pruss_intc_initdata = PRUSS_INTC_INITDATA;
   prussdrv_pruintc_init(&pruss_intc_initdata);
 
   printf("Executing program and waiting for termination\n");
-  if (argc == 3) {
-    printf("attempting to load data file\n");
-    if (prussdrv_load_datafile(0 /* PRU0 */, argv[2]) < 0) {
-      fprintf(stderr, "Error loading %s\n", argv[2]);
-      exit(-1);
-    } else {
-      printf("Data file loaded\n");
-    }
+
+  printf("attempting to load data file\n");
+  if (prussdrv_load_datafile(0 /* PRU0 */, data_file) < 0) {
+    fprintf(stderr, "Error loading %s\n", data_file);
+    exit(-1);
   } else {
-    printf("no data file\n");
+    printf("Data file loaded\n");
   }
 
-  if (prussdrv_exec_program(0 /* PRU0 */, argv[1]) < 0) {
-    fprintf(stderr, "Error loading %s\n", argv[1]);
+  if (prussdrv_exec_program(0 /* PRU0 */, text_file) < 0) {
+    fprintf(stderr, "Error loading %s\n", text_file);
     exit(-1);
   }
 
@@ -50,6 +67,4 @@ int main(int argc, char **argv) {
 
   prussdrv_pru_disable(0 /* PRU0 */);
   prussdrv_exit();
-
-  return 0;
 }

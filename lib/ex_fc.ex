@@ -4,9 +4,11 @@ defmodule ExFC do
   def start(_type, _args) do
     import Supervisor.Spec, warn: false
 
+    configure_pins
+
     val = ExFC.PruLoader.enable_prus(
-      String.to_char_list("priv/text1"),
-      String.to_char_list("data1"),
+      priv_file("rc_pru0/text.bin") |> String.to_char_list(),
+      priv_file("rc_pru0/data.bin") |> String.to_char_list(),
       String.to_char_list("text2"),
       String.to_char_list("data2")
     )
@@ -30,4 +32,14 @@ defmodule ExFC do
 
   #  blink_forever(pid)
   #end
+  #
+  def priv_file(name) do
+    :filename.join(:code.priv_dir(:ex_fc), name)
+  end
+
+  def configure_pins do
+    "sh #{priv_file("config-pins.sh")}"
+    |> String.to_char_list()
+    |> :os.cmd()
+  end
 end

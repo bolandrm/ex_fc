@@ -6,7 +6,11 @@ defmodule ExFC.PruLoader do
     :ok = :erlang.load_nif(path, 0)
   end
 
-  def enable_prus(text1, data1, text2, data2) do
+  def enable_prus(_text1, _data1, _text2, _data2) do
     raise "NIF enable_prus/4 not implemented"
+  end
+
+  def read_rc_values do
+    raise "NIF read_rc_values/0 not implemented"
   end
 end

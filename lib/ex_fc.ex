@@ -16,7 +16,7 @@ defmodule ExFC do
     IO.puts "hello #{val}"
 
     children = [
-      #worker(Task, [fn -> blink_forever(pid) end], restart: :transient),
+      worker(Task, [fn -> check_rc_values end], restart: :transient),
       #worker(PiFc.RemoteControl, [], restart: :transient)
     ]
 
@@ -24,15 +24,18 @@ defmodule ExFC do
     Supervisor.start_link(children, opts)
   end
 
-  #def blink_forever(pid) do
-  #  Gpio.write(pid, @gpio_on)
-  #  :timer.sleep @blink_duration
-  #  Gpio.write(pid, @gpio_off)
-  #  :timer.sleep @blink_duration
+  def check_rc_values do
+    { ch1, ch2, ch3, ch4 } = ExFC.PruLoader.read_rc_values
 
-  #  blink_forever(pid)
-  #end
-  #
+    [ch1, ch2, ch3, ch4]
+    |> Enum.map(fn(x) -> round(x * 0.005) end)
+    |> IO.inspect
+
+    :timer.sleep 300
+
+    check_rc_values
+  end
+
   def priv_file(name) do
     :filename.join(:code.priv_dir(:ex_fc), name)
   end

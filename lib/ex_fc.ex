@@ -7,10 +7,10 @@ defmodule ExFC do
     configure_pins
 
     val = ExFC.PruLoader.enable_prus(
-      priv_file("rc_pru0/text.bin") |> String.to_char_list(),
-      priv_file("rc_pru0/data.bin") |> String.to_char_list(),
-      String.to_char_list("text2"),
-      String.to_char_list("data2")
+      String.to_char_list("text0"),
+      String.to_char_list("data0"),
+      priv_file("rc_pru1/text.bin") |> String.to_char_list(),
+      priv_file("rc_pru1/data.bin") |> String.to_char_list()
     )
 
     IO.puts "hello #{val}"

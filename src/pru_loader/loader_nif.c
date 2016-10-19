@@ -1,12 +1,13 @@
 #include <stdio.h>
 #include <stdint.h>
-#include "erl_nif.h"
-#include "loader.h"
-
+#include <erl_nif.h>
 #include <prussdrv.h>
 #include <pruss_intc_mapping.h>
+#include "shared_headers/types.h"
 
 #define MAX_BUF_LEN 1024
+
+void load_pru1(char *text_file, char *data_file);
 
 static ERL_NIF_TERM
 nif_enable_prus(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
@@ -22,29 +23,22 @@ nif_enable_prus(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
 
   printf("c printing %s \n", text0);
 
-  load_pru0(text0, data0);
+  load_pru1(text1, data1);
 
   return enif_make_int(env, 0);
 }
 
 static ERL_NIF_TERM
 nif_read_rc_values(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
-  //uint32_t rc_values[4] = { 0 };
-  //read_rc_values(rc_values);
-
-  uint32_t *mem_pointer;
-  prussdrv_map_prumem(PRUSS0_SHARED_DATARAM, (void **) &mem_pointer);
+  volatile shared_mem_t *shared_mem;
+  prussdrv_map_prumem(PRUSS0_SHARED_DATARAM, (void **) &shared_mem);
 
   return enif_make_tuple4(
     env,
-    //enif_make_int(env, rc_values[0]),
-    //enif_make_int(env, rc_values[1]),
-    //enif_make_int(env, rc_values[2]),
-    //enif_make_int(env, rc_values[3])
-    enif_make_int(env, mem_pointer[0]),
-    enif_make_int(env, mem_pointer[1]),
-    enif_make_int(env, mem_pointer[2]),
-    enif_make_int(env, mem_pointer[3])
+    enif_make_int(env, shared_mem->rc_values[0]),
+    enif_make_int(env, shared_mem->rc_values[1]),
+    enif_make_int(env, shared_mem->rc_values[2]),
+    enif_make_int(env, shared_mem->rc_values[3])
   );
 }
 
@@ -55,3 +49,23 @@ static ErlNifFunc nif_funcs[] = {
 };
 
 ERL_NIF_INIT(Elixir.ExFC.PruLoader, nif_funcs, NULL, NULL, NULL, NULL)
+
+void load_pru1(char *text_file, char *data_file) {
+  prussdrv_init();
+  if (prussdrv_open(PRU_EVTOUT_0) == -1) {
+    printf("prussdrv_open() failed\n");
+  }
+
+  tpruss_intc_initdata pruss_intc_initdata = PRUSS_INTC_INITDATA;
+  prussdrv_pruintc_init(&pruss_intc_initdata);
+
+  if (prussdrv_load_datafile(PRU1, data_file) < 0) {
+    fprintf(stderr, "Error loading %s\n", data_file);
+  } else {
+    printf("Data file loaded\n");
+  }
+
+  if (prussdrv_exec_program(PRU1, text_file) < 0) {
+    fprintf(stderr, "Error loading %s\n", text_file);
+  }
+}

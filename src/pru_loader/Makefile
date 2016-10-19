@@ -47,9 +47,9 @@ all: $(GEN_DIR)/pru_loader.so
 #%.o: %.c
 #	$(CC) -c $(ERL_CFLAGS) $(CFLAGS) -o $@ $<
 
-$(GEN_DIR)/pru_loader.so: *.c *.h
+$(GEN_DIR)/pru_loader.so: *.c
 	@mkdir -p $(GEN_DIR)
-	$(CC) -shared -fPIC -O3 -std=c99 -finline-functions -Wall -Wmissing-prototypes -I. -I$(ERL_EI_INCLUDE_DIR) -lprussdrv -o $@ loader.c loader_nif.c
+	$(CC) -shared -fPIC -O3 -std=c99 -finline-functions -Wall -Wmissing-prototypes -I. -I.. -I$(ERL_EI_INCLUDE_DIR) -lprussdrv -o $@ loader_nif.c
 
 #$(CC) $^ $(ERL_LDFLAGS) $(LDFLAGS) -o $@
 
